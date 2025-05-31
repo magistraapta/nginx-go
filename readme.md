@@ -1,53 +1,55 @@
-# Nginx Load Balancer Implementation
+# Nginx Load Balancer with Go Backend
 
-This project demonstrates the implementation of a load balancer using Nginx, a high-performance web server and reverse proxy. The load balancer helps distribute incoming network traffic across multiple backend servers, improving application reliability, scalability, and performance.
+This project demonstrates the implementation of a load balancer using Nginx with a Go backend service. The setup uses Docker and Docker Compose for easy deployment and scaling.
 
 ## Features
 
-- Load balancing across multiple backend servers
+- Load balancing across multiple Go backend instances
+- Docker-based deployment
 - Configurable load balancing algorithms
 - Health checks for backend servers
-- SSL/TLS termination support
-- High availability and fault tolerance
+- Easy scaling of backend services
+- Containerized environment
 
 ## Prerequisites
 
-- Nginx installed on your system
-- Multiple backend servers to distribute traffic
-- Basic understanding of Nginx configuration
+- Docker and Docker Compose installed on your system
+- Basic understanding of Docker and Nginx configuration
 
 ## Project Structure
 
 ```
 nginx-go/
-├── nginx.conf          # Main Nginx configuration file
-├── upstream.conf       # Upstream server configurations
-└── ssl/               # SSL certificates directory (if using HTTPS)
+├── docker-compose.yml    # Docker Compose configuration
+├── nginx/               # Nginx configuration
+│   └── nginx.conf      # Main Nginx configuration
+└── backend/            # Go backend service
+    ├── cmd/           # Application entry points
+    ├── config/        # Configuration files
+    ├── dockerfile     # Backend service Dockerfile
+    ├── go.mod         # Go module file
+    └── go.sum         # Go dependencies checksum
 ```
 
 ## Configuration
 
-The load balancer can be configured through the following files:
+The project is configured through the following files:
 
-1. `nginx.conf`: Main configuration file that includes:
-   - HTTP/HTTPS server blocks
+1. `docker-compose.yml`: Defines the services and their relationships:
+   - Nginx load balancer service
+   - Go backend service
+   - Network configuration
+   - Volume mappings
+
+2. `nginx/nginx.conf`: Contains the Nginx configuration:
    - Load balancing settings
-   - SSL configuration (if enabled)
-   - Logging settings
+   - Upstream server definitions
+   - Proxy settings
 
-2. `upstream.conf`: Contains the configuration for backend servers:
-   - Server definitions
-   - Load balancing method
-   - Health check parameters
-
-## Load Balancing Methods
-
-The implementation supports various load balancing algorithms:
-
-- Round Robin (default)
-- Least Connections
-- IP Hash
-- Weighted Round Robin
+3. `backend/`: Contains the Go application:
+   - Main application code
+   - Configuration files
+   - Dockerfile for building the backend service
 
 ## Getting Started
 
@@ -57,50 +59,59 @@ The implementation supports various load balancing algorithms:
    cd nginx-go
    ```
 
-2. Configure your backend servers in `upstream.conf`
-
-3. Adjust the main configuration in `nginx.conf` according to your needs
-
-4. Start Nginx:
+2. Build and start the services:
    ```bash
-   sudo nginx -t        # Test configuration
-   sudo nginx          # Start Nginx
+   docker-compose up --build
+   ```
+
+3. To scale the backend service:
+   ```bash
+   docker-compose up --scale backend=3
    ```
 
 ## Configuration Example
 
-```nginx
-# upstream.conf
-upstream backend {
-    server backend1.example.com:8080;
-    server backend2.example.com:8080;
-    server backend3.example.com:8080;
-}
+```yaml
+# docker-compose.yml
+version: '3'
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
 
-# nginx.conf
-server {
-    listen 80;
-    server_name example.com;
-
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+  backend:
+    build: ./backend
+    expose:
+      - "8080"
 ```
 
 ## Monitoring and Maintenance
 
-- Check Nginx status: `sudo systemctl status nginx`
-- View access logs: `tail -f /var/log/nginx/access.log`
-- View error logs: `tail -f /var/log/nginx/error.log`
+- View container logs:
+  ```bash
+  docker-compose logs -f
+  ```
+
+- Check container status:
+  ```bash
+  docker-compose ps
+  ```
+
+- Scale services:
+  ```bash
+  docker-compose up --scale backend=3
+  ```
 
 ## Security Considerations
 
-- Keep Nginx and all dependencies updated
-- Implement proper SSL/TLS configuration
-- Use secure headers
+- Keep Docker images updated
+- Implement proper network security in Docker Compose
+- Use secure headers in Nginx configuration
 - Implement rate limiting
 - Regular security audits
 
