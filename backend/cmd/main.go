@@ -24,11 +24,13 @@ func main() {
 
 type Message struct {
 	Message string `json:"message"`
+	Server  string `json:"server"`
 }
 
 func GetMessage(w http.ResponseWriter, r *http.Request) {
 	message := Message{
 		Message: "Hello from docker",
+		Server:  os.Getenv("PORT"),
 	}
 
 	json.NewEncoder(w).Encode(message)
