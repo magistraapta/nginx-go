@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"nginx-go/config"
@@ -15,7 +14,6 @@ func main() {
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", IndexHandler)
-	router.HandleFunc("/load", GetMessage)
 
 	log.Println("Server is running on port", os.Getenv("PORT"))
 
@@ -29,23 +27,19 @@ type Message struct {
 	Server  string `json:"server"`
 }
 
-func GetMessage(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	message := Message{
 		Message: "Hello from docker",
 		Server:  os.Getenv("PORT"),
 	}
 
-	json.NewEncoder(w).Encode(message)
-}
-
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.Execute(w, nil)
+	err = tmpl.Execute(w, message)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
