@@ -18,12 +18,13 @@ WORKDIR /app
 
 # Copy only the binary from the builder stage
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env .
 
 # Run as non-root user for better security
 RUN adduser -D -g '' appuser
 USER appuser
 
+# Environment variables should be provided at runtime
+# Example: docker run -e DB_HOST=localhost -e DB_PORT=5432 ...
 
 EXPOSE 8080
 
