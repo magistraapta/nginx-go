@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"nginx-go/config"
 	"os"
+	"text/template"
 )
 
 func main() {
@@ -14,12 +14,14 @@ func main() {
 
 	router := http.NewServeMux()
 
-	router.HandleFunc("/", GetMessage)
+	router.HandleFunc("/", IndexHandler)
+	router.HandleFunc("/load", GetMessage)
+
+	log.Println("Server is running on port", os.Getenv("PORT"))
 
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), router); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-	fmt.Println("Server is running on port", os.Getenv("PORT"))
 }
 
 type Message struct {
@@ -34,4 +36,18 @@ func GetMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(message)
+}
+
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
