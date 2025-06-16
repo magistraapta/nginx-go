@@ -28,4 +28,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: your-dockerhub-username/your-image-name:latest
+          tags: magistra99/nginx-go:latest
