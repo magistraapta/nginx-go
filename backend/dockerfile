@@ -24,6 +24,7 @@ COPY --from=builder /app/.env .
 RUN adduser -D -g '' appuser
 USER appuser
 
+
 EXPOSE 8080
 
 CMD ["./main"]
