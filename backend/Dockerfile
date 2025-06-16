@@ -18,6 +18,9 @@ WORKDIR /app
 
 # Copy only the binary from the builder stage
 COPY --from=builder /app/main .
+# Copy .env file and templates directory
+COPY --from=builder /app/.env .
+COPY --from=builder /app/templates ./templates
 
 # Run as non-root user for better security
 RUN adduser -D -g '' appuser
